@@ -278,13 +278,77 @@ public inline fun repeat(times: Int, action: (Int) -> Unit) {
 
 ### 코틀린의 함수
 
+기본적인 함수의 구조는 다음과 같다.
+
+```kotlin
+fun sum(a: Int, b: Int) : Int {
+  	return a + b
+}
+```
+
+자바와 다른 부분이 몇가지 있는데, 코틀린에서는 변수를 선언할 때 `name: type`  형태를 가진다.
+
+추가적으로 특이한 점은 코틀린에서 함수는 중가로를 생략시킬 수 있다. (이것을 Single Expression Functions라고 부름 Sef)
+
+```kotlin
+fun sum(a: Int, b: Int) : Int = a + b
+```
+
+
+
+**확장함수(Extension Functions)** 
+
+코틀린에는 다양한 함수 스타일을 지원하는데, 그중에 확장함수는 이미 만들어진 클래스에 새로운 함수를 추가하여 사용할 수 있도록 한다.
+
+이미 만들어진 라이브러리에 대해 함수를 추가실킬 수 있는 기능이 매우 매력적..
+
+```kotlin
+fun String.name() : String = "이름은 $this"
+```
+
+
+
+**고차함수(Higher-Order Functions)**
+
+매개변수로 함수를 받거나, 함수를 반환하는 함수를 고차함수라고 한다.
+
+```kotlin
+fun name(name: String, speak: (String) -> String): String {}
+```
+
+확실히 Kotlin이 Functional하게 코드를 작성하기 편리한 것 같다.
+
+
+
+```kotlin
+// docs example
+fun <T, R> Collection<T>.fold(
+    initial: R,
+    combine: (acc: R, nextElement: T) -> R
+): R {
+    var accumulator: R = initial
+    for (element: T in this) {
+        accumulator = combine(accumulator, element)
+    }
+    return accumulator
+}
+```
 
 
 
 
-### 코틀린의 익명함수
 
+**익명함수(Anonymous Functions)**
 
+람다표현식에서 사용할 때 유용하며, 일반함수와 다른 점은 메서드의 네이밍이 없다.
+
+```kotlin
+// 익명함수
+fun(x: Int, y: Int): Int = x + y
+
+// example
+ints.filter(fun(item) = item > 0)
+```
 
 
 
