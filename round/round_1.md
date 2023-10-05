@@ -109,7 +109,15 @@ val name = """
 
 
 
-### 코틀린의 상수
+### Const
+
+컴파일 타임 상수를 지정할 때 사용한다.
+
+컴파일이 진행되는 타임때 상수가 정의가 됨 -> 그렇기 때문에 원시적인 값만 가능!
+
+```kotlin
+const val name = "김동건"
+```
 
 
 
@@ -117,17 +125,152 @@ val name = """
 
 ### 코틀린의 연산자
 
+코틀린의 연산자도 대부분의 자바 연산자와 마찬가지로 유사하게 혹은 같은 형식으로 사용되어진다.
 
+그중에서 몇가지..다른 연산자 유형이 있다.
+
+
+
+**비트 연산자**
+
+```kotlin
+val x = 0b1100
+val y = 0b1010
+val leftShifted = x shl 2 // 왼쪽으로 2비트 시프트
+val rightShifted = x shr 1 // 오른쪽으로 1비트 시프트
+val bitwiseAnd = x and y // 비트 AND 연산
+val bitwiseOr = x or y // 비트 OR 연산
+val bitwiseXor = x xor y // 비트 XOR 연산
+val bitwiseNot = x.inv() // 비트 NOT 연산
+```
+
+비트연산의 경우, `shl, shr, and, or, xor, inv()` 등과 같이 특정 기호가 아닌 자연처럼 사용되어 진다.
+
+
+
+**범위 연산자**
+
+자바에서는 범위 연산자를 지원하지 않는다. 대부분 for문을 도는 형식을 사용한다.
+
+그런데, kotlin에서는 범위 연산자를 지원한다.
+
+
+
+```kotlin
+val range = 1..10 // 1 <= range <= 10
+val rangeByUntil = 1 until 10 // 1 <= rangeByUntil < 10
+
+val isContained = 5 in range // 5가 범위 내에 있는지 확인 
+```
+
+
+
+**엘비스 연산자**
+
+코틀린은 null을 허용하지 않는다. 대신 null인 객체에 대한 표기가 가능하다.
+
+```kotlin
+val name : String = "극락코딩" // null 불가
+val name : String? = "극락코딩" // null 가능
+```
+
+
+
+엘비스 연산자는 Null이 아닌 경우 왼쪽 피연산자를 반환하며, null이면 오른쪽 피연산자를 반환한다.
+
+```
+val name : String? = "극락코딩" // null 가능
+val nickname = name ?: "나락코딩"
+```
+
+null 관련 처리가 더욱 더 간단해진다.
 
 
 
 ### 코틀린의 조건문
 
-- kotlin에서 if문은 statement가 아닌 expression이다.
+- kotlin에서 if문은 statement가 아닌 expression이다. (자바에서는 Statement이다.)
+
+```kotlin
+val result = if(a > b) a else b
+```
+
+
+
+위와 다른 형식으로 조건문을 표현할 수 있다.
+
+```kotlin
+val result = a.takeIf { a > b} ?: b
+val result = b.takeUnless { a > b } ?: a
+```
+
+kotlin library의 Standard.kt에서 다음의 func를 지원한다.
+
+```kotlin
+/**
+ * Returns `this` value if it satisfies the given [predicate] or `null`, if it doesn't.
+ *
+ * For detailed usage information see the documentation for [scope functions](https://kotlinlang.org/docs/reference/scope-functions.html#takeif-and-takeunless).
+ */
+@kotlin.internal.InlineOnly
+@SinceKotlin("1.1")
+public inline fun <T> T.takeIf(predicate: (T) -> Boolean): T? {
+    contract {
+        callsInPlace(predicate, InvocationKind.EXACTLY_ONCE)
+    }
+    return if (predicate(this)) this else null
+}
+
+/**
+ * Returns `this` value if it _does not_ satisfy the given [predicate] or `null`, if it does.
+ *
+ * For detailed usage information see the documentation for [scope functions](https://kotlinlang.org/docs/reference/scope-functions.html#takeif-and-takeunless).
+ */
+@kotlin.internal.InlineOnly
+@SinceKotlin("1.1")
+public inline fun <T> T.takeUnless(predicate: (T) -> Boolean): T? {
+    contract {
+        callsInPlace(predicate, InvocationKind.EXACTLY_ONCE)
+    }
+    return if (!predicate(this)) this else null
+}
+```
+
+
 
 
 
 ### 코틀린의 반복문
+
+자바와 유사하게 반복문을 처리할 수 있고, 추가적인 func를 제공한다.
+
+```kotlin
+repeat((0..10).count()) { println("극락코딩 $it") }
+```
+
+repeat을 사용하게 되면, 기존의 for-each보다 간결하게 로직을 작성할 수 있다.
+
+(대부분의 kotlin extension method 들이 functional하게 구성되어 있다.)
+
+
+
+```kotlin
+/**
+ * Executes the given function [action] specified number of [times].
+ *
+ * A zero-based index of current iteration is passed as a parameter to [action].
+ *
+ * @sample samples.misc.ControlFlow.repeat
+ */
+@kotlin.internal.InlineOnly
+public inline fun repeat(times: Int, action: (Int) -> Unit) {
+    contract { callsInPlace(action) }
+
+    for (index in 0 until times) {
+        action(index)
+    }
+}
+```
 
 
 
