@@ -354,6 +354,53 @@ ints.filter(fun(item) = item > 0)
 
 ### 코틀린의 람다 표현식
 
+람다 표현식은 중가로`{}`안에 작성되며, 자바 표현식과 같이, `parameter -> operator`해당 형태로 구성되어진다.
+
+
+
+// docs example
+
+```kotlin
+fun uppercaseString(string: String): String {
+    return string.uppercase()
+}
+fun main() {
+    println(uppercaseString("hello"))
+    // HELLO
+}
+
+-----
+
+fun main() {
+    println({ string: String -> string.uppercase() }("hello"))
+    // HELLO
+}
+```
+
+
+
+람다표현식을 특정 변수에 할당하거나, 메서드에 전달할 수 있다.
+
+```kotlin
+fun main() {
+    val upperCaseString = { string: String -> string.uppercase() }
+    println(upperCaseString("hello"))
+    // HELLO
+}
+
+val numbers = listOf(1, -2, 3, -4, 5, -6)
+val positives = numbers.filter { x -> x > 0 }
+val negatives = numbers.filter { x -> x < 0 }
+println(positives)
+// [1, 3, 5]
+println(negatives)
+// [-2, -4, -6]
+```
+
+다음과 같이 참조되어 할당될 수 있는건, 람다표현식은 expression(식)이기 때문이다.
+
+
+
 
 
 
