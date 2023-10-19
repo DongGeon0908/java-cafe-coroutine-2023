@@ -468,7 +468,7 @@ A2의 주 생성자 표기에서는 _name을 사용했는데, 해당 이유는 �
 
 만약, 생성자를 별도로 지정하지 않았다면, 컴파일러가 자동으로 default constructor를 생성합니다.
 
-```
+```kotlin
 open class A
 ```
 
@@ -480,7 +480,7 @@ open class A
 
 한번만 인스턴스화하고 다른 곳에서는 인스턴스화를 못하게 해야 하는 경우가 있는데, 코틀린에서는 다음과 같은 방법으로 비공개 생성자를 만들어 관리할 수 있습니다.
 
-```
+```kotlin
 class A private constructor() {}
 ```
 
@@ -494,7 +494,7 @@ class A private constructor() {}
 
 - 자바와 다르게, 코틀린에서 클래스를 새롭게 생성할 때 new 키워드를 쓸 필요가 없습니다.
 
-  - ```
+  - ```kotlin
     val a = A()
     ```
 
@@ -502,7 +502,7 @@ class A private constructor() {}
 
 - 생성자의 순서를 개발자가 정의 혹은 변경도 가능합니다. 더불어 생성자의 인자에 대한 이름을 지정할 수 있습니다.
 
-  - ```
+  - ```kotlin
     val a = A(name = "김동건")
     ```
 
@@ -584,7 +584,7 @@ equasls, toString, hashcode 등 기본적으로 모든 클래스가 생성해야
 
 
 
-```
+```kotlin
 fun a() {
     val a = AB(name = "hello", age = 10)
     val b = a.copy(name = "goofy")
@@ -715,7 +715,7 @@ class Goofy {
 
 다양한 메서드가 있지만, 저의 경우에는 max(), min()을 가장 많이 사용합니다. (다들 가장 많이 쓰는 연산자가 있을까요?)
 
-```
+```kotlin
 fun a() {
     val max = listOf(1,5,11,2).maxOrNull() // max is 11
     val min = listOf(1,5,11,2).minOrNull() // min is 1
