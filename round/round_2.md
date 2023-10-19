@@ -7,11 +7,15 @@
 
 
 
-들어가기에 앞서, 코틀에서는 바에서 겪었던 불편함?을 최대한 줄일려고 했다고 생각합니다.
+>  들어가기에 앞서, 코틀에서는 바에서 겪었던 불편함?을 최대한 줄일려고 했다고 생각합니다.
 
-더불어, 불확실성에 대한 안정성을 고민, 고려했다고 생각합니다.
+>  더불어, 불확실성에 대한 안정성을 고민, 고려했다고 생각합니다.
 
 
+
+<br>
+
+<br>
 
 ### Interface
 
@@ -23,6 +27,8 @@ interface JavaCafe {
 }
 ```
 
+<br>
+
 
 
 상속의 경우는 다음과 같이 진행한다.
@@ -33,13 +39,15 @@ class CoroutineStudy : JavaCafe {
 }
 ```
 
-
+<br>
 
 자바와 다른 점은, extends나 implements가 없다는 것이다.
 
 상속이 진행된 경우, override메서드를 꼭 선언해야 한다. (이 점은 자바와 다릅니다.)
 
+<br>
 
+<br>
 
 ### override 선언을 강제하는 이유는 무엇 때문일까?
 
@@ -55,7 +63,9 @@ Goofy(
 )
 ```
 
+<br>
 
+<br>
 
 ### Default Method
 
@@ -63,7 +73,7 @@ Goofy(
 
 단, default 를 붙이지 않는다.
 
-
+<br>
 
 ```kotlin
 interface CoroutineStudy {
@@ -72,6 +82,8 @@ interface CoroutineStudy {
 ```
 
 
+
+<br><br>
 
 ### Default Method에 대한 구현 강제
 
@@ -99,6 +111,8 @@ interface WebfluxStudy {
 
 
 
+<br>
+
 ```kotlin
 class JavaCafe : CoroutineStudy, WebfluxStudy {
     override fun study() {
@@ -120,6 +134,8 @@ interface WebfluxStudy {
 
 
 
+<br><br>
+
 ### 코틀린의 변경자
 
 코틀린은 모든 클래스가 기본적으로 final로 만들어진다. (상속 불가..)
@@ -128,6 +144,8 @@ interface WebfluxStudy {
 
 
 
+<br><br>
+
 ### 코틀린이 왜 기본적으로 Final로 클래스를 만들까?
 
 처음 class를 만든 개발자의 의도와 다르게 기반 클래스를 상속 및 변경하여 사용함으로서, 의도하지 않은 버그와 이슈들이 많이 발생했다.
@@ -135,6 +153,8 @@ interface WebfluxStudy {
 코틀린은 이런 예기치 않은 문제들에 대한 해결책으로 기본적으로 final로 class를 생성한다. (Method도 동일)
 
 
+
+<br>
 
 ```kotlin
 open class CoroutineStudy : JavaCafe {
@@ -154,6 +174,8 @@ open class CoroutineStudy : JavaCafe {
 
 
 
+<br><br>
+
 ### 회사에서 상속을 통해 구현하다가, 문제가 발생한 적이 있는가?
 
 공통 모듈을 커스텀하게 사용하고 싶었다. 그래서 해당 코드를 상속하고, 내 입맛에 맞추어 변경하였다.
@@ -165,6 +187,8 @@ open class CoroutineStudy : JavaCafe {
 기존 코드를 더 확인해보았는데, 내가 하려했던 작업에 대해서는 지원하지 않는 것을 파악했다...
 
 
+
+<br><br>
 
 ### 추상 클래스
 
@@ -180,6 +204,8 @@ abstract class JavaCafe {
 
 
 
+<br><br>
+
 ### 가시성 변경자
 
 기본적으로는 코틀린의 가시성 변경자는 자바와 거의 비슷하다.
@@ -190,6 +216,8 @@ abstract class JavaCafe {
 
 
 
+<br><br>
+
 ### 모듈 단위의 가시성 변경자
 
 패키지 단위의 접근 제한자가 없다. 대신, 모듈 단위의 접근 제한자가 있다.
@@ -197,6 +225,10 @@ abstract class JavaCafe {
 여기서 모듈은 한 번에 컴파일되는 코틀린 파일들의 집합을 의미한다. (프로젝트가 모듈이 될 수 있음)
 
 
+
+
+
+<br><br>
 
 ### 가시성 변경자와 접근 제한자
 
@@ -210,6 +242,10 @@ abstract class JavaCafe {
 
 
 
+
+
+<br>
+
 **접근 제한자**
 
 >클래스 멤버(클래스 내부의 변수, 함수 등)가 다른 클래스에서 얼마나 "접근"할 수 있는지를 결정하는 키워드를 의미,
@@ -218,6 +254,8 @@ abstract class JavaCafe {
 
 
 
+<br>
+
 **가시성 변경자**
 
 > 클래스 정의 블록 내부의 코드 블록에서 어떻게 클래스 멤버를 "볼 수 있는지" 결정
@@ -225,6 +263,8 @@ abstract class JavaCafe {
 > 클래스 내부에서 사용되며 클래스 외부에서 멤버를 참조하는 경우에는 접근 제한자가 적용
 
 
+
+<br><br>
 
 ### 중첩 클래스
 
@@ -235,6 +275,8 @@ abstract class JavaCafe {
 만약, 바깥 클래스에 대한 참조를 하고 싶다면, Inner를 붙여야 한다!
 
 
+
+<br>
 
 ```kotlin
 class A {
@@ -252,6 +294,8 @@ class A {
 
 
 
+<br>
+
 추가적으로, 코틀린에서 바깥쪽 클래스를 참조할려면 다음과 같이 진행해야 한다.
 
 ```kotlin
@@ -268,6 +312,8 @@ class A {
 
 
 
+<br><br>
+
 ### Sealed Class
 
 제가 생각하기에 sealed class가 kotlin에서 추가된 가장 큰 이유는, **상속을 제한할 수 있다** 입니다. 
@@ -276,9 +322,15 @@ class A {
 
 
 
+<br>
+
 일반적으로, 특정 class 상속하고, 인스턴스화 하여 비교하는 로직을 구성한다면, 다음과 같이 작성할 수 있다.
 
 
+
+
+
+<br>
 
 ```
 open class A {
@@ -315,6 +367,8 @@ fun type(type: A) = when (type) {
 
 
 
+<br>
+
 ```
 fun type(type: A) = when (type) {
     is B -> {
@@ -338,6 +392,8 @@ else 문구가 들어갑니다. 이유는 상위 클래스가 하위의 어떤 �
 
 
 
+
+<br><br>
 
 
 
@@ -372,6 +428,8 @@ fun type(type : A) = when(type) {
 
 
 
+<br><br>
+
 **Sealed Class의 장점들**
 
 1. enum 클래스처럼 사용할 수 있습니다. 위에 제시한 예시처럼, Sealed Class를 이용하게 되면,  enum과 같은 형식으로 코드를 구현할 수 있습니다.
@@ -379,6 +437,10 @@ fun type(type : A) = when(type) {
 3. 그 밖에 어떠한 장점들이 있다고 생각하시나요?
 
 
+
+
+
+<br><br>
 
 ### class의 초기화 (주 생성자와 초기화 블록)
 
@@ -412,6 +474,8 @@ open class A
 
 
 
+<br><br>
+
 **비공개 생성자에 대해..**
 
 한번만 인스턴스화하고 다른 곳에서는 인스턴스화를 못하게 해야 하는 경우가 있는데, 코틀린에서는 다음과 같은 방법으로 비공개 생성자를 만들어 관리할 수 있습니다.
@@ -421,6 +485,8 @@ class A private constructor() {}
 ```
 
 
+
+<br><br>
 
 
 
@@ -442,6 +508,8 @@ class A private constructor() {}
 
 
 
+<br><br>
+
 ### 부 생성자
 
 부 생성자도 주 생성자와 마찬가지로 constructor로 시작합니다. 
@@ -457,6 +525,8 @@ class A(
 ```
 
 
+
+<br><br>
 
 ### 인터페이스에 프로퍼티
 
@@ -478,6 +548,8 @@ class Goofy(val request: Request) : User {
 
 
 
+<br><br>
+
 
 
 ### ==과 equals에 대해
@@ -493,6 +565,8 @@ equals의 경우에는 두 피연산자의 주소가 같은지 비교한다. (�
 기본적으로 ==을 사용한다, 그런데 자바에서처럼 버그가 발생하는 경우는 없다. 왜냐하면, ==의 내부 연산 구조에서 equals가 포함되기 때문이다.
 
 
+
+<br><br>
 
 ### 데이터 클래스 
 
@@ -519,11 +593,17 @@ fun a() {
 
 
 
+<br><br>
+
 ### by??? 
 
 해당 키워드에 대해 명확히 이해가 되지 않는데,,,.. 도움이 필요합니다..
 
 
+
+<br><br>
+
+<br><br>
 
 ---
 
@@ -565,9 +645,21 @@ fun main() {
 
 **(chatgpt의 도움)**
 
+
+
+
+
+<br><br>
+
+<br><br>
+
 ----
 
 
+
+<br><br>
+
+<br><br>
 
 ### object
 
@@ -578,6 +670,8 @@ kotlin에서 object라는 키워드가 있는데, 해당 키워드 블락은 클
 (저의 경우에는 싱글톤, 혹은 상수를 관리할때도 사용합니다.)
 
 
+
+<br><br>
 
 **싱글톤 만들기**
 
@@ -592,6 +686,8 @@ Goofy.name()
 어떻게 보면, java의 static method와 흡사하다.
 
 
+
+<br><br>
 
 **동반객체**
 
@@ -610,6 +706,8 @@ class Goofy {
 혹은, 동반객체를 통한 확장함수를 만들어 사용합니다.
 
 
+
+<br><br>
 
 ### Aggreagate Operations(코틀린의 연산자 집합)
 
@@ -631,9 +729,15 @@ fun a() {
 
 
 
+<br><br>
+
 # 
 
 ### Aggregation, Composition
+
+
+
+<br><br>
 
 **Aggregation (has-a)**
 
@@ -671,6 +775,8 @@ fun main() {
 
 
 
+<br><br>
+
 **Composition (has-a)**
 
 - Composition은 하나의 객체가 다른 객체를 "합성"하여 더 높은 수준의 객체
@@ -704,6 +810,8 @@ Engine은 Car에 LifeCycle을 맞춰감..
 
 
 
+<br><br>
+
 
 
 - [baeldung](https://www.baeldung.com/java-composition-aggregation-association)
@@ -729,6 +837,8 @@ class MyService(
 
 
 
+<br><br>
+
 **property Injection (속성 주입):**
 
 ```kotlin
@@ -743,6 +853,8 @@ class MyService {
 `@Autowired`나 `@Inject` 어노테이션을 사용하여 의존성을 클래스의 프로퍼티에 주입하는 방법
 
 
+
+<br><br>
 
 **Method Injection (메서드 주입)**
 
@@ -763,6 +875,8 @@ class MyService {
 
 
 
+<br><br>
+
 
 
 **Constructor-Based DI with `@ConstructorBinding`**
@@ -780,9 +894,9 @@ spring Boot 2.2 이상에서는 `@ConstructorBinding` 어노테이션을 사용�
 
 
 
+<br>
 
-
-
+<br>
 
 
 
