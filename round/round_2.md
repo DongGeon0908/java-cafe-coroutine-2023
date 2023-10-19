@@ -332,7 +332,7 @@ class A {
 
 <br>
 
-```
+```kotlin
 open class A {
 }
 
@@ -369,7 +369,7 @@ fun type(type: A) = when (type) {
 
 <br>
 
-```
+```kotlin
 fun type(type: A) = when (type) {
     is B -> {
 
@@ -399,7 +399,7 @@ else 문구가 들어갑니다. 이유는 상위 클래스가 하위의 어떤 �
 
 반면에, sealed class를 이용하는 경우에는, 다음과 같이 상속을 받는 하위 클래스 들에 대해 제한을 할 수 있습니다.
 
-```
+```kotlin
 sealed class A {
 }
 
@@ -446,7 +446,7 @@ fun type(type : A) = when(type) {
 
 클래스 이름 뒤에 나오는 괄호 사이의 선언을 kotlin에서는 **주 생성자** 라고 합니다.
 
-```
+```kotlin
 class A1(name: String)
 
 class A2 constructor(_name: String) {
