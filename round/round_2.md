@@ -7,6 +7,12 @@
 
 
 
+들어가기에 앞서, 코틀에서는 바에서 겪었던 불편함?을 최대한 줄일려고 했다고 생각합니다.
+
+더불어, 불확실성에 대한 안정성을 고민, 고려했다고 생각합니다.
+
+
+
 ### Interface
 
 코틀린에서는 다음과 같이 인터페이스를 정의한다.
@@ -435,4 +441,350 @@ class A private constructor() {}
     ```
 
 
+
+### 부 생성자
+
+부 생성자도 주 생성자와 마찬가지로 constructor로 시작합니다. 
+
+```kotlin
+class A(
+	val name : String
+) {
+	constructor(human: Human) {
+		this.name = human.name
+	}
+}
+```
+
+
+
+### 인터페이스에 프로퍼티
+
+코틀린에서는 인터페이스에 프로퍼티를 추가할 수 있다. 단, 해당 프로퍼티는 추상 프로퍼티로서, 해당 값들을 어디선가 초기화할 수 있도록 로직을 구성해야 한다.
+
+```kotlin
+interface User {
+		val name: String
+}
+
+class DongGeon(override val name: String) : User
+class Goofy(val request: Request) : User {
+		override val name: String
+			get() = request.name
+}
+```
+
+위와 같은 방식으로 인터페이스의 프로퍼티를 초기화할 수 있다.
+
+
+
+
+
+### ==과 equals에 대해
+
+자바에서 **==** 원시타입과 참조 타입을 비교할 때 사용한다. (동등성)
+
+equals의 경우에는 두 피연산자의 주소가 같은지 비교한다. (참보 비교)
+
+
+
+그럼 kotlin은 어떤 식을 사용할까?
+
+기본적으로 ==을 사용한다, 그런데 자바에서처럼 버그가 발생하는 경우는 없다. 왜냐하면, ==의 내부 연산 구조에서 equals가 포함되기 때문이다.
+
+
+
+### 데이터 클래스 
+
+equasls, toString, hashcode 등 기본적으로 모든 클래스가 생성해야 하는(혹은 오버라이드를 통해 구현을 변경해줘야 하는) 요소들을 kotlin의 dataclass가 알아서 잘! 만들어준다.
+
+모든 프로퍼티에 대해 적용하여 구현체를 만들기 때문에, 자바에서 있었던 불편함..줄어든다.
+
+
+
+**데이터 클래스의 사기적인 copy()**
+
+특정 객체에 대해, 모든 프로퍼티를 바꾸는 것이 아닌, 특정 프로퍼티만 바꿀 수 있도록 코틀린은 지원한다.
+
+여기서 사기인 점은, val 로 선언된 프로퍼티도 변경이 가능하다..
+
+
+
+```
+fun a() {
+    val a = AB(name = "hello", age = 10)
+    val b = a.copy(name = "goofy")
+}
+```
+
+
+
+### by??? 
+
+해당 키워드에 대해 명확히 이해가 되지 않는데,,,.. 도움이 필요합니다..
+
+
+
+---
+
+`by` 키워드는 Kotlin에서 델리게이션(delegation) 패턴을 쉽게 구현하기 위한 기능을 제공합니다. 델리게이션 패턴은 객체 지향 프로그래밍에서 하나의 클래스가 다른 클래스의 일부 기능을 위임하거나 재사용하기 위해 사용되는 패턴입니다. `by` 키워드는 이러한 델리게이션을 쉽게 구현할 수 있도록 도와줍니다.
+
+`by` 키워드를 사용하여 델리게이션을 구현할 때, 클래스 A가 다른 클래스 B의 인스턴스를 내부적으로 가지고, 클래스 B의 메서드 호출을 클래스 A에서 호출하도록 위임합니다. 이를 통해 코드 재사용과 모듈화를 강화할 수 있습니다.
+
+예를 들어, 다음은 `by` 키워드를 사용하여 델리게이션을 구현하는 간단한 예제입니다:
+
+```kotlin
+interface Printer {
+    fun print(text: String)
+}
+
+class ConsolePrinter : Printer {
+    override fun print(text: String) {
+        println("Printing: $text")
+    }
+}
+
+class Document(private val printer: Printer) : Printer by printer {
+    fun generateDocument() {
+        print("Document content")
+    }
+}
+
+fun main() {
+    val consolePrinter = ConsolePrinter()
+    val document = Document(consolePrinter)
+    document.generateDocument()
+}
+```
+
+이 예제에서 `Document` 클래스는 `Printer` 인터페이스를 구현하는 `ConsolePrinter` 클래스의 인스턴스를 가지고 있습니다. `Document` 클래스는 `Printer by printer` 구문을 사용하여 `print` 메서드를 `printer` 객체에 위임하고, `generateDocument` 메서드를 호출하면 실제로 `printer` 객체에서 `print` 메서드가 실행됩니다.
+
+`by` 키워드를 사용하면 델리게이션을 통해 코드를 재사용하고 클래스 간의 결합도를 낮추는데 도움이 됩니다.
+
+
+
+**(chatgpt의 도움)**
+
+----
+
+
+
+### object
+
+kotlin에서 object라는 키워드가 있는데, 해당 키워드 블락은 클래스 정의와 생성을 동시에 진행하는 특징이 있다.
+
+주로, 싱글톤과 동반 객체, 무명 내부 클래스 등에서 사용한다.
+
+(저의 경우에는 싱글톤, 혹은 상수를 관리할때도 사용합니다.)
+
+
+
+**싱글톤 만들기**
+
+```kotlin
+object Goofy {
+		fun name() = "goofy"
+}
+
+Goofy.name()
+```
+
+어떻게 보면, java의 static method와 흡사하다.
+
+
+
+**동반객체**
+
+클래스 내부에 정적인 멤버와 함수를 저장하고, 클래스와 관련된 공유 데이터나 동작을 제공하는 용도로 사용되는 것을 동반 객체라고 합니다.
+
+```kotlin
+class Goofy {
+		companion object {
+				private const val name = "GOOFY GOOD!"
+		}
+}
+```
+
+저의 경우에는 주로, 팩토리 메서드를 만들거나, 혹은 상수를 관리할 때 사용합니다.
+
+혹은, 동반객체를 통한 확장함수를 만들어 사용합니다.
+
+
+
+### Aggreagate Operations(코틀린의 연산자 집합)
+
+코틀린에서 정말 다양한 연사들을 제공하고, 이를 통해 코드 개발을 진행시 가독성과 라인수를 화끈하게 줄일 수 있습니다.
+
+다양한 메서드가 있지만, 저의 경우에는 max(), min()을 가장 많이 사용합니다. (다들 가장 많이 쓰는 연산자가 있을까요?)
+
+```
+fun a() {
+    val max = listOf(1,5,11,2).maxOrNull() // max is 11
+    val min = listOf(1,5,11,2).minOrNull() // min is 1
+}
+```
+
+
+
+- [baeldung](https://www.baeldung.com/kotlin/aggregate-operations)
+- [kotlin docs](https://kotlinlang.org/docs/collection-aggregate.html)
+
+
+
+# 
+
+### Aggregation, Composition
+
+**Aggregation (has-a)**
+
+- Aggregation은 하나의 객체가 다른 객체들을 모아놓은 "집합"을 의미
+- Aggregation은 포함된 객체가 독립적으로 존재할 수 있으며, 하나의 객체가 다른 객체를 참조할 뿐
+- Composition에 비해서 느슨한 관계이며, 포함된 관계가 독립적 존재 가능
+- **객체의 수명주기에는 영향을 주지는 않지만, 이를 관리함으로서 유용한 기능을 제공한다.** 
+  - **(내 손가락이 10개여서 타자를 잘침, 8개면 좀 힘들고, 2개면 힘들고, 그런데 지금 독수리 타자인...)**
+
+```kotlin
+class Book(val title: String)
+
+class Library(val books: List<Book>) {
+    fun listBooks() {
+        for (book in books) {
+            println(book.title)
+        }
+    }
+}
+
+fun main() {
+    val book1 = Book("Book 1")
+    val book2 = Book("Book 2")
+
+    val booksInLibrary = listOf(book1, book2)
+    val library = Library(booksInLibrary)
+
+    library.listBooks()
+}
+```
+
+라이브러리는 다수의 Book 객체를 가질 수 있으며, 이에 대한 관리 작업을 수행할 수 있음
+
+
+
+
+
+**Composition (has-a)**
+
+- Composition은 하나의 객체가 다른 객체를 "합성"하여 더 높은 수준의 객체
+- Composition은 포함된 객체가 더 높은 수준의 객체에 의존하며, 높은 수준의 객체가 생성될 때 포함된 객체를 생성
+- **강하게 응집되었으며, 더 높은 수준의 객체에 LifeCycle이 맞춰짐 **
+  - **(건물 안에 방이 있음. 근데 건물이 부셔지면, 방도 부셔지는 거임)**
+
+```kotlin
+class Engine {
+    fun start() {
+        println("Engine started")
+    }
+}
+
+class Car {
+    private val engine: Engine = Engine()
+
+    fun startCar() {
+        engine.start()
+        println("Car started")
+    }
+}
+
+fun main() {
+    val myCar = Car()
+    myCar.startCar()
+}
+```
+
+Engine은 Car에 LifeCycle을 맞춰감..
+
+
+
+
+
+- [baeldung](https://www.baeldung.com/java-composition-aggregation-association)
+
+---
+
+### Dependency Injection
+
+kotlin 기반의 spring di 방법은 다음과 같다.
+
+**constructor Injection (생성자 주입)**
+
+```kotlin
+@Service
+class MyService(
+  private val myRepository: MyRepository
+) {
+    // ...
+}
+```
+
+생성자를 통해 의존성을 주입하는 방법
+
+
+
+**property Injection (속성 주입):**
+
+```kotlin
+@Service
+class MyService {
+    @Autowired
+    lateinit var myRepository: MyRepository
+    // ...
+}
+```
+
+`@Autowired`나 `@Inject` 어노테이션을 사용하여 의존성을 클래스의 프로퍼티에 주입하는 방법
+
+
+
+**Method Injection (메서드 주입)**
+
+```kotlin
+@Service
+class MyService {
+    private lateinit var myRepository: MyRepository
+
+    @Autowired
+    fun setMyRepository(myRepository: MyRepository) {
+        this.myRepository = myRepository
+    }
+    // ...
+}
+```
+
+메서드를 사용하여 의존성을 주입하는 방법
+
+
+
+
+
+**Constructor-Based DI with `@ConstructorBinding`**
+
+```kotlin
+@ConstructorBinding
+@ConfigurationProperties("my")
+data class MyProperties(
+  val property1: String, 
+  val property2: String
+)
+```
+
+spring Boot 2.2 이상에서는 `@ConstructorBinding` 어노테이션을 사용하여 생성자 기반의 DI를 지원
+
+
+
+
+
+
+
+
+
+- [baeldung code](https://github.com/Baeldung/kotlin-tutorials)
 
