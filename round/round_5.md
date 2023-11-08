@@ -93,3 +93,8 @@ suspend fun test1() {
 해당 상황에서, logic 2는 부모와 독립된 다른 컨텍스트이므로, logic1은 계속 수행
 
 - 에러 전파 X
+
+### Reference
+
+- [Composing suspending functions](https://kotlinlang.org/docs/composing-suspending-functions.html)
+- [Coroutine context and dispatchers](https://kotlinlang.org/docs/coroutine-context-and-dispatchers.html)
