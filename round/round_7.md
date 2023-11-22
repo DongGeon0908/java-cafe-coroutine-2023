@@ -465,3 +465,7 @@ public suspend inline fun <E> ReceiveChannel<E>.consumeEach(action: (E) -> Unit)
 
 - 왜 Fan-out에서 consumeEach가 불안정할까?
 - EventListener 기반으로 동작하는 로직들을 코루틴의 Channel을 통해 개선할 수 있을까?
+
+### 참고사항
+
+- [kotlin docs](https://kotlinlang.org/docs/coroutines-and-channels.html)
