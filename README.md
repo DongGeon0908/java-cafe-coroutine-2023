@@ -50,3 +50,7 @@
 ### [6회차](round/round_6.md)
 
 - 코틀린 코루틴 테스트하기
+
+### [7회차](round/round_7.md)
+
+- Channel
