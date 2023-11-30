@@ -562,22 +562,189 @@ public interface Flow<out T> {
 
 ### 플로우와 시퀀스 비교, 시퀀스 먼저
 
+**list,set**
 
+- 모든 원소의 계산이 완료된 컬렉션
+- 값들을 계산하는 과정에 시간이 걸리기 때문에, 원소들이 채워질 떄까지 모든 값이 생성되길 기다려야 함
 
+```kotlin
+fun getList(): List<Int> = List(3) { Thread.sleep(1000)
+"User$it"
+}
+fun main() {
+val list = getList() println("Function started") list.forEach { println(it) }
+}
+// (3 sec)
+// Function started
+// User0
+// User1
+// User2
 
+```
+- 원소를 하나씩 계산할 때는 원소가 나오자마자 얻을 수 있는 것이 좋아서 -> Sequence가 이때 좋음
 
+**Sequence**
 
+```kotlin
+fun getList(): List<Int> = List(3) {
+  Thread.sleep(1000)
+  "User$it"
+}
 
+fun main() {
+  val list = getList()
+  println("Function started")
 
+  list.forEach { println(it) }
+}
+// (3 sec)
+// Function started
+// User0
+// User1
+// User2
 
+```
 
+- CPU 집약적인 연산, 블로킹 연산일 때 필요시마다 값을 계산하는 플로우에 적용하기 적합
+- 시퀀스의 최종연산은 중단함수가 아니기 때문에 (foreach, map) 시퀀스 내부에 중단점이 있으면 값을 기다리는 스레드가 블로킹
+- 시퀀스 빌더의 스코프 안에서는 SequenceScope의 리시버에서 호출되는 yield, yieldAll 외에 다른 중단 함수 사용 불가
+- 시퀀스 로직 안에 중단 함수 있으면, 예상하지 못한 스레드 블로킹을 통해 지옥을 맛봄
+- 데이터 소스의 개수가 많거나, 원소가 무거운 경우, 시퀀스 사용에 적합
 
+```kotlin
+val fibonacci: Sequence<BigInteger> = sequence {
+  var first = 0.toBigInteger()
+var second = 1.toBigInteger()
 
+while (true) {
+  yield(first)
+  val temp = first
+  first += second
+  second = temp
+}
+}
+fun countCharactersInFile(path: String): Int = File(path).useLines { lines ->
+        lines.sumBy { it.length }
+    }
+```
 
+- 이전에 파일 입출력 관련 로직을 만들때 Sequence를 사용했는데, 확실히 성능상 좋았음..
 
+**시퀀스 로직의 이슈**
+- 같은 스레드에서 launch로 시작된 코루틴이 대기하게 되면서, 하나의 코루틴이 다른 코루틴을 블로킹
 
+```kotlin
+fun getSequence(): Sequence<String> = sequence { repeat(3) {
+Thread.sleep(1000)
+// the same result as if there were delay(1000) here yield("User$it")
+} }
 
+suspend fun main() { withContext(newSingleThreadContext("main")) {
+launch {
+            repeat(3) {
+                delay(100)
+                println("Processing on coroutine")
+            }
+}
+val list = getSequence()
+        list.forEach { println(it) }
+    }
+}
+// (1 sec)
+// User0
+// (1 sec)
+// User1
+// (1 sec)
+// User2
+// Processing on coroutine
+// (0.1 sec)
+// Processing on coroutine
+// (0.1 sec)
+// Processing on coroutine
+```
 
+- 이런 상황에서, Flow 사용해야 함 (다른 말로는.. 논블리킹 코드가 들어가야하는 경우에 사용하는 것이 좋다?)
 
+**플로우를 사용하자!**
+
+- Sequence에서 제공하는 기능을 전부 사용 가능
+- 구조화된 동시성 그리고 예외 처리 기능이 수월
+- Sequence로직과 같이 동작해야 하는데, 코루틴이 섞여 있는 경우라면, FLow를 사용하는 것이 이득!!
+
+```kotlin
+fun getFlow(): Flow<String> = flow { repeat(3) {
+delay(1000)
+emit("User$it") }
+}
+suspend fun main() { withContext(newSingleThreadContext("main")) {
+        launch {
+            repeat(3) {
+
+  delay(100)
+                println("Processing on coroutine")
+            }
+}
+val list = getFlow()
+        list.collect { println(it) }
+    }
+}
+// (0.1 sec)
+// Processing on coroutine
+// (0.1 sec)
+// Processing on coroutine
+// (0.1 sec)
+// Processing on coroutine
+// (1 - 3 * 0.1 = 0.7 sec)
+// User0
+// (1 sec)
+// User1
+// (1 sec)
+// User2
+```
+
+**플로우의 특징**
+
+- 플로우의 최종 연산은 스레드를 블로킹하는 대신 코루틴을 중단
+- 코루틴 컨텍스트를 활용하고, 예외를 처리하는 코루틴 기능 제공
+- 취소가 가능, 구조화된 동시성 적용 가능
+- flow 빌더는 중단 함수가 아니며, 어떤 스코프도 불필요
+- 최종 연산은 중단 가능, 연산이 실행될 때 부모 코루틴과의 관계 정립
+- flow의 연산은 가장 마지막 최종 연산의 코루틴을 통해 진행
+
+**launch를 취소하면 플로우 처리도 적절하게 취소**
+
+```kotlin
+// Notice, that this function is not suspending // and does not need CoroutineScope
+fun usersFlow(): Flow<String> = flow {
+    repeat(3) {
+        delay(1000)
+val ctx = currentCoroutineContext() val name = ctx[CoroutineName]?.name emit("User$it in $name")
+} }
+suspend fun main() {
+val users = usersFlow()
+withContext(CoroutineName("Name")) { val job = launch {
+            // collect is suspending
+            users.collect { println(it) }
+        }
+launch {
+
+} }
+}
+delay(2100)
+println("I got enough")
+job.cancel()
+// (1 sec)
+// User0 in Name
+// (1 sec)
+// User1 in Name
+// (0.1 sec)
+// I got enough
+```
+
+**플로우의 실제 사용 사례**
+
+- 실시간으로 데이터를 처리하는 경우'
+- 웹소켓과 같은 알림 서버
+- 처리율 제한 장치 (flatMapMerge)
 
 
