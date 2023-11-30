@@ -200,3 +200,185 @@ val fooChannel = produceString("foo", 210L) val barChannel = produceString("BAR"
 
 결론적으로 select는 로직의 경합, 채널의 송수신 등에서 사용할 수 있습니다.
 그런데, kotlin coroutine issue에 select 관련해서 내용이 있는 것을 보니.. 쓰기 좀 망설여집니다.
+
+### 핫데이터 소스, 콜드 데이터 소스, FLOW
+
+**핫데이터란?**
+
+- 데이터를 소비하는 것과 무관하게 원소를 생성
+- Channel, List, Set
+
+**콜드데이터란?**
+
+- 요청이 있을 떄만 작업을 수행
+- 아무것도 저장하지 않음
+- Flow, Stream, Sequence
+- 중간에 생성되는 값들을 보관할 필요 없어, 메모리 사용에 좋음
+
+**Sequence**
+
+- 원소를 지연 처리, 적은 연산
+- 특정 연산을 수행하고 나서, 그것에 대한 임시 데이터를 기록하지 않고, 모든 연산을 처리후에 데이터를 반환
+
+```kotlin
+fun m(i: Int): Int { print("m$i ")
+return i * i }
+fun f(i: Int): Boolean { print("f$i ")
+return i >= 10 }
+fun main() {
+    listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+        .map { m(it) }
+        .find { f(it) }
+        .let { print(it) }
+
+    // m1 m2 m3 m4 m5 m6 m7 m8 m9 m10 f1 f4 f9 f16 16
+    println()
+
+  sequenceOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+    .map { m(it) }
+    .find { f(it) }
+    .let { print(it) }
+// m1 f1 m2 f4 m3 f9 m4 f16 16
+}
+
+```
+- 리스트는 원소의 컬렉션
+- **Sequence는 원소를 어떻게 계산할 것인지 정의한 것**
+
+**핫 데이터 스트림**
+
+```kotlin
+fun m(i: Int): Int { print("m$i ")
+
+return i * i }
+
+fun main() {
+
+val l = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+        .map { m(it) } // m1 m2 m3 m4 m5 m6 m7 m8 m9 m10
+    println(l) // [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+    println(l.find { it > 10 }) // 16
+    println(l.find { it > 10 }) // 16
+    println(l.find { it > 10 }) // 16
+
+val s = sequenceOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10) .map { m(it) }
+    println(s.toList())
+    // [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+    println(s.find { it > 10 }) // m1 m2 m3 m4 16
+    println(s.find { it > 10 }) // m1 m2 m3 m4 16
+    println(s.find { it > 10 }) // m1 m2 m3 m4 16
+}
+```
+
+- 항상 사용 가능한 상태 (모든 연산이 최종 연산이 될 수 있음)
+- 여러번 사용되었을 때 매번 결과를 다시 계산할 필요 없음
+
+### 핫 채널, 콜드 플로우
+
+**기억을 되짚어, channel 생성 방법**
+
+```kotlin
+val channel = produce { while (true) {
+val x = computeNextValue()
+  send(x) }
+}
+```
+- 다음과 같이 채널을 생성할 수 있음
+- 채널은 바로 값을 계산
+- 별도의 코루틴에서 계산을 수행
+- 코루틴의 확장함수어야 함 (코루틴 빌더)
+- 소비되는 것과 상관없이 값을 생성
+
+**플로우를 생성하는 일반적인 방법**
+
+```kotlin
+
+val flow = flow { while (true) {
+val x = computeNextValue()
+  emit(x) }
+}
+```
+- 반면에 flow는 코루틴 빌더가 아님
+- 값이 필요할 때만 생성
+- 최종 연산이 호출될 때 원소가 어떻게 생성되어야 하는 지 정의
+- flow 빌더는 빌더를 호출한 최정 연산의 스코프에서 동작
+
+
+flow code
+```kotlin
+/**
+ * Creates a _cold_ flow from the given suspendable [block].
+ * The flow being _cold_ means that the [block] is called every time a terminal operator is applied to the resulting flow.
+ *
+ * Example of usage:
+ *
+ * ```
+ * fun fibonacci(): Flow<BigInteger> = flow {
+ *     var x = BigInteger.ZERO
+ *     var y = BigInteger.ONE
+ *     while (true) {
+ *         emit(x)
+ *         x = y.also {
+ *             y += x
+ *         }
+ *     }
+ * }
+ *
+ * fibonacci().take(100).collect { println(it) }
+ * ```
+ *
+ * Emissions from [flow] builder are [cancellable] by default &mdash; each call to [emit][FlowCollector.emit]
+ * also calls [ensureActive][CoroutineContext.ensureActive].
+ *
+ * `emit` should happen strictly in the dispatchers of the [block] in order to preserve the flow context.
+ * For example, the following code will result in an [IllegalStateException]:
+ *
+ * ```
+ * flow {
+ *     emit(1) // Ok
+ *     withContext(Dispatcher.IO) {
+ *         emit(2) // Will fail with ISE
+ *     }
+ * }
+ * ```
+ *
+ * If you want to switch the context of execution of a flow, use the [flowOn] operator.
+ */
+public fun <T> flow(@BuilderInference block: suspend FlowCollector<T>.() -> Unit): Flow<T> = SafeFlow(block)
+
+// Named anonymous object
+private class SafeFlow<T>(private val block: suspend FlowCollector<T>.() -> Unit) : AbstractFlow<T>() {
+    override suspend fun collectSafely(collector: FlowCollector<T>) {
+        collector.block()
+    }
+}
+```
+
+여기서 이슈는... 이런 FLow를 어떤 상황에서 사용해야할지..
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
